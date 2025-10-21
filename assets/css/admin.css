@@ -1,0 +1,569 @@
+/* 
+ * City Pages Generator - Admin CSS
+ * 
+ * Dieses Stylesheet definiert das komplette Design für das Plugin-Admin-Interface:
+ * - Moderne, saubere Benutzeroberfläche
+ * - Responsive Design für verschiedene Bildschirmgrößen
+ * - Konsistente Farbpalette und Typografie
+ * - Spezielle Styles für Batch-Verarbeitung und Fortschrittsanzeigen
+ * - Integration mit WordPress Admin-Design
+ */
+
+/* Basis-Container für alle Plugin-Seiten */
+.cpg-generator-container,
+.cpg-overview-container,
+.cpg-settings-container,
+.cpg-help-container {
+    background: #fff;                    /* Weißer Hintergrund */
+    border: 1px solid #e5e7eb;          /* Dezente graue Umrandung */
+    border-radius: 6px;                 /* Abgerundete Ecken */
+    padding: 16px 18px;                 /* Innenabstand */
+}
+
+/* Breitere Container für bessere Nutzung der Bildschirmbreite */
+.cpg-settings-container,
+.cpg-help-container {
+    max-width: 1200px;                   /* Maximale Breite für bessere Lesbarkeit */
+    width: 100%;                        /* Volle Breite bis zum Maximum */
+    margin: 0 auto;                     /* Zentrierung */
+}
+
+/* Platzhalter-Tab: Tabellen- und Formular-Styling */
+.card {
+    max-width: 1200px;                   /* Konsistente Breite mit anderen Containern */
+    width: 100%;                        /* Volle Breite */
+    margin: 0 auto;                     /* Zentrierung */
+}
+
+#cpg-simple-ph-no-ki-table,
+#cpg-simple-ph-table {
+    width: 100%;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+#cpg-simple-ph-no-ki-table thead th,
+#cpg-simple-ph-table thead th {
+    background: #f8fafc;
+    color: #111827;
+    font-weight: 600;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 12px 14px;
+}
+
+#cpg-simple-ph-no-ki-table tbody td,
+#cpg-simple-ph-table tbody td {
+    padding: 12px 14px;
+    vertical-align: top;
+    border-top: 1px solid #f1f5f9;
+}
+
+#cpg-simple-ph-no-ki-table input.regular-text,
+#cpg-simple-ph-table input.regular-text {
+    width: 100%;
+    max-width: none;
+}
+
+#cpg-simple-ph-no-ki-table textarea.large-text,
+#cpg-simple-ph-table textarea.large-text {
+    width: 100%;
+    min-height: 44px;
+}
+
+#cpg-simple-ph-no-ki-table tbody tr:hover,
+#cpg-simple-ph-table tbody tr:hover {
+    background: #fafcff;
+}
+
+.cpg-help-container form .button-primary,
+.cpg-settings-container form .button-primary {
+    margin-top: 12px;
+}
+
+.cpg-form h3,
+.cpg-overview-container h3,
+.cpg-settings-container h3,
+.cpg-help-container h3 {
+    margin-top: 8px;
+    color: #1f2937;
+}
+
+.cpg-form .form-table th {
+    width: 220px;
+}
+
+.cpg-notice.info { background: #eef2ff; border-left: 4px solid #6366f1; }
+.cpg-notice.success { background: #ecfdf5; border-left: 4px solid #10b981; }
+.cpg-notice.error { background: #fef2f2; border-left: 4px solid #ef4444; }
+.cpg-notice.warning { background: #fffbeb; border-left: 4px solid #f59e0b; }
+
+.cpg-progress { display: none; margin: 12px 0; background: #f3f4f6; border-radius: 6px; height: 10px; }
+.cpg-progress-fill { background: #3b82f6; height: 10px; width: 0; border-radius: 6px; transition: width .3s ease; }
+.cpg-progress-text { font-size: 12px; color: #6b7280; margin-top: 6px; }
+
+.cpg-result-item { border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px; margin-bottom: 10px; }
+.cpg-result-item.success { background: #f8fafc; }
+.cpg-result-item.error { background: #fef2f2; }
+.cpg-result-title { font-weight: 600; color: #111827; }
+.cpg-result-meta { color: #6b7280; font-size: 12px; }
+.cpg-result-actions .button { margin-right: 6px; }
+
+.cpg-status-publish { color: #065f46; }
+.cpg-status-draft { color: #92400e; }
+
+.cpg-city-item { border-bottom: 1px dashed #e5e7eb; padding: 8px 0; }
+.cpg-city-name { font-weight: 600; margin-right: 6px; }
+.cpg-city-info { color: #6b7280; margin-left: 6px; }
+
+/* Tabelle Übersicht */
+.cpg-overview-container table.wp-list-table code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; }
+
+/* Buttons dezent lassen */
+.cpg-overview-container .button-primary { background-color: #2563eb; }
+.cpg-overview-container .button-link-delete { color: #b91c1c; }
+
+/* Schöne Tabs */
+.nav-tab-wrapper { border-bottom: 1px solid #e5e7eb; margin-top: 14px; }
+.nav-tab-wrapper .nav-tab {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-bottom: none;
+    color: #374151;
+    padding: 8px 14px;
+    margin-right: 6px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+}
+.nav-tab-wrapper .nav-tab:hover { background: #f3f4f6; color: #111827; }
+.nav-tab-wrapper .nav-tab.nav-tab-active {
+    background: #ffffff;
+    color: #111827;
+    box-shadow: 0 -1px 0 #e5e7eb inset;
+}
+
+/* Gemini KI Features */
+.cpg-gemini-status {
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.cpg-ki-test {
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    margin-top: 20px;
+}
+
+.cpg-ki-results {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 16px;
+}
+
+.cpg-ki-result-item {
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.cpg-ki-result-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.cpg-ki-result-item h5 {
+    margin: 0 0 8px 0;
+    color: #374151;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.cpg-ki-result-content {
+    background: white;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    padding: 12px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #374151;
+}
+
+.cpg-keyword-tag {
+    display: inline-block;
+    background: #dbeafe;
+    color: #1e40af;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    margin: 2px 4px 2px 0;
+    border: 1px solid #bfdbfe;
+}
+
+.cpg-feature-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cpg-feature-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.cpg-feature-card h4 {
+    margin: 0 0 8px 0;
+    color: #1f2937;
+    font-size: 16px;
+}
+
+.cpg-feature-card p {
+    margin: 0 0 12px 0;
+    color: #6b7280;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.cpg-feature-card ul {
+    margin: 0;
+    padding-left: 16px;
+    color: #4b5563;
+    font-size: 13px;
+}
+
+.cpg-feature-card li {
+    margin-bottom: 4px;
+}
+
+/* Keywords Tabelle */
+#cpg-keywords-table {
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+#cpg-keywords-table th {
+    background: #f9fafb;
+    font-weight: 600;
+    color: #374151;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+#cpg-keywords-table td {
+    border-bottom: 1px solid #f3f4f6;
+}
+
+#cpg-keywords-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Welcome Banner vollständig entfernt */
+
+/* Städte-Liste als Grid (nebeneinander) */
+.cpg-cities-list {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+	gap: 10px;
+}
+
+/* Kompakte Karten statt Linienliste */
+.cpg-cities-list .cpg-city-item {
+	border: 1px solid #e5e7eb;
+	border-radius: 6px;
+	padding: 8px 10px;
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	background: #ffffff;
+}
+
+/* Checkbox kompakt halten */
+.cpg-cities-list .cpg-city-item .cpg-city-checkbox {
+	margin: 2px 0 0 0;
+}
+
+/* Textblock sauber ausrichten */
+.cpg-cities-list .cpg-city-item label {
+	display: block;
+	cursor: pointer;
+}
+
+/* Name und Meta enger setzen */
+.cpg-cities-list .cpg-city-name {
+	display: inline-block;
+	margin-right: 6px;
+}
+.cpg-cities-list .cpg-city-info {
+	display: inline-block;
+	margin-left: 0;
+	color: #6b7280;
+	font-size: 12px;
+}
+
+/* Letter-Filter optisch etwas dichter */
+.cpg-letter-filter .button {
+	padding: 2px 8px;
+	line-height: 22px;
+}
+
+/* Batch-Verarbeitung Styles */
+.cpg-batch-info {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 15px 0;
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.cpg-batch-info::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.cpg-batch-info h4 {
+    margin: 0 0 8px 0;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cpg-batch-info .batch-icon {
+    width: 20px;
+    height: 20px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+.cpg-batch-progress {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 15px 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.cpg-batch-status {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.cpg-batch-status .spinner {
+    float: none;
+    margin: 0;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f4f6;
+    border-top: 2px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.cpg-batch-details {
+    font-size: 14px;
+    color: #64748b;
+    margin-top: 10px;
+    line-height: 1.5;
+}
+
+.cpg-batch-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.cpg-batch-stat {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+}
+
+.cpg-batch-stat-number {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1f2937;
+    display: block;
+}
+
+.cpg-batch-stat-label {
+    font-size: 12px;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.cpg-progress-enhanced {
+    background: #f1f5f9;
+    border-radius: 10px;
+    height: 12px;
+    overflow: hidden;
+    margin: 15px 0;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.cpg-progress-fill-enhanced {
+    background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+    height: 12px;
+    border-radius: 10px;
+    transition: width 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.cpg-progress-fill-enhanced::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.cpg-progress-text-enhanced {
+    font-size: 14px;
+    color: #374151;
+    margin-top: 8px;
+    font-weight: 500;
+}
+
+/* Ergebnisse-Liste */
+.cpg-results-list {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 10px;
+    background: #f9fafb;
+}
+
+.cpg-results-list .cpg-result-item {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.cpg-results-list .cpg-result-item:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transform: translateY(-1px);
+}
+
+.cpg-results-list .cpg-result-item.success {
+    border-left: 4px solid #10b981;
+}
+
+.cpg-results-list .cpg-result-item.error {
+    border-left: 4px solid #ef4444;
+}
+
+.cpg-results-list .cpg-result-title {
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 4px;
+}
+
+.cpg-results-list .cpg-result-meta {
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.cpg-results-list .cpg-result-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.cpg-results-list .cpg-result-actions .button {
+    padding: 4px 8px;
+    font-size: 12px;
+    line-height: 1.2;
+}
+
+/* Server-Überlastungsschutz */
+.cpg-server-protection {
+    background: #fef3c7;
+    border: 1px solid #f59e0b;
+    border-radius: 6px;
+    padding: 12px;
+    margin: 10px 0;
+    color: #92400e;
+}
+
+.cpg-server-protection h4 {
+    margin: 0 0 8px 0;
+    color: #92400e;
+    font-size: 14px;
+}
+
+.cpg-server-protection ul {
+    margin: 8px 0 0 0;
+    padding-left: 16px;
+}
+
+.cpg-server-protection li {
+    margin-bottom: 4px;
+    font-size: 13px;
+}
+
+/* Neue Generierung Buttons */
+#cpg-new-generation,
+#cpg-new-generation-running {
+    transition: all 0.3s ease;
+    border-radius: 6px;
+    font-weight: 500;
+    margin: 5px;
+}
+
+#cpg-new-generation:hover {
+    background: #1d4ed8 !important;
+    border-color: #1d4ed8 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3);
+}
+
+#cpg-new-generation-running:hover {
+    background: #6b7280 !important;
+    border-color: #6b7280 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+}
+
+
