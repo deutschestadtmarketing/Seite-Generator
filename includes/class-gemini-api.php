@@ -461,21 +461,34 @@ class CPG_Gemini_API {
 		// --- HIER BEGINNT DER NEUE, VERBESSERTE PROMPT ---
     
 		// Der Prompt wird als PHP "Nowdoc" definiert, fokussiert auf reine Lokal-Anpassung ohne neue Infos.
-		$prompt = <<<'PROMPT'
-	Bitte formuliere den folgenden Vorlage-Text minimal um, ausschließlich auf die Stadt {stadt}, {bundesland} zugeschnitten.
-	
-	Strikte Regeln:
-	- Verwende nur Informationen aus dem Vorlage-Text.
-	- Füge keine neuen Fakten, Services, Preise, Öffnungszeiten, USPs oder Behauptungen hinzu, die nicht im Vorlage-Text stehen.
-	- Mache den Stadtbezug deutlich (verwende {stadt} natürlich im Text), ohne künstlich zu wirken.
-	- Erhalte Sinn, Reihenfolge der Abschnitte und ungefähre Länge des Vorlage-Texts.
-	- Sprache: Deutsch (Deutschland). Keine Markdown-Formatierung. Keine Erklärungen – gib nur den finalen Text aus.
-	
-	Vorlage-Text:
-	---
-	{template_text}
-	---
-	PROMPT;
+$prompt = <<<'PROMPT'
+Du bist ein professioneller SEO-Redakteur, spezialisiert auf das Verfassen einzigartiger lokaler Landingpages.
+
+**Dein Auftrag:**
+Nimm den "Vorlage-Text" (der HTML enthält) und formuliere ihn für die Stadt **{stadt} ({bundesland})** komplett neu.
+
+**Ziele:**
+1.  **Hohe Einzigartigkeit:** Der neue Text muss **signifikant** umformuliert werden. Verwende einen anderen Satzbau, aktive statt passive Formulierungen (oder umgekehrt), Synonyme und variiere die Satzlänge. Das Ergebnis darf **nicht** wie eine bloße Kopie des Originals mit ersetzten Wörtern klingen.
+2.  **Inhaltliche Konsistenz:** Die Kernbotschaft, der Sinn und der Detaillierungsgrad des Textes müssen erhalten bleiben.
+3.  **Natürliche Lokalisierung:** Baue den Stadtnamen **{stadt}** (und ggf. **{bundesland}**) an 1-2 passenden Stellen **natürlich** in den Text ein. Integriere es logisch, nicht nur "Suchen & Ersetzen".
+
+**Kritische Regel (HTML-Struktur):**
+-   Deine einzige Aufgabe ist es, den **Textinhalt ZWISCHEN** den HTML-Tags zu ändern.
+-   Alle HTML-Tags (z.B. `<p>`, `<h2>`, `<strong class="xyz">`, `<span>`, `<div id="abc">`, `<br>`) müssen **exakt und 1:1** wie in der Vorlage erhalten bleiben.
+-   Du darfst **KEINE** HTML-Tags, Attribute, Klassen, IDs oder die Struktur verändern, hinzufügen oder entfernen. Die HTML-Struktur ist **UNANTASTBAR**.
+
+**Format-Vorgaben:**
+-   Sprache: Deutsch (Deutschland).
+-   Keine Markdown-Syntax.
+-   Ausgabe: Gib **ausschließlich** den finalen, neu getexteten HTML-Block zurück. Schreibe keine Einleitung, keine Kommentare und keine Erklärungen wie "Hier ist der Text:".
+
+---
+Vorlage-Text (HTML):
+{template_text}
+---
+PROMPT;
+
+
     
 		// Ersetzen der Platzhalter im Prompt mit den PHP-Variablen (ohne Keywords/Theme)
 		$prompt = str_replace(

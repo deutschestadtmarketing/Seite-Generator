@@ -20,6 +20,7 @@
         cities: [],              // Array der geladenen Städte
         selectedCities: [],      // Array der ausgewählten Städte
         isGenerating: false,     // Flag ob gerade Seiten generiert werden
+        currentRequest: null,    // jqXHR der aktuellen Anfrage (für Abbrechen)
         keywords: [],            // Array der benutzerdefinierten Keywords
         currentLetter: 'ALL',    // Aktueller Buchstabenfilter für Städte
 
@@ -431,6 +432,13 @@
             $('#cpg-progress').show();
             $('.cpg-progress-fill').css('width', percent + '%');
             $('.cpg-progress-text').text(text);
+            // Bei laufender Generierung einen Abbrechen-Button anbieten
+            if (CPG.isGenerating) {
+                if (!$('#cpg-cancel').length) {
+                    $('#cpg-progress').append('<button type="button" id="cpg-cancel" class="button button-secondary" style="margin-left:8px">Abbrechen</button>');
+                    $('#cpg-cancel').off('click').on('click', CPG.cancelGeneration);
+                }
+            }
         },
 
         renderResults: function(results) {
@@ -796,83 +804,140 @@
         },
 
         performGenerationWithRetry: function(sourcePageId, selectedCityData, slugPattern, replacements, timeout, retryCount) {
-            var maxRetries = 2;
-            
-            $.ajax({
-                url: cpgAjax.ajaxurl,
-                type: 'POST',
-                timeout: timeout,
-                data: {
-                    action: 'cpg_generate_pages',
-                    nonce: cpgAjax.nonce,
-                    source_page_id: sourcePageId,
-                    cities: JSON.stringify(selectedCityData),
-                    slug_pattern: slugPattern,
-                    replacements: JSON.stringify(replacements)
-                },
-                success: function(response) {
-                    if (response.success) {
-                        // Prüfen ob Batch-Verarbeitung gestartet wurde
-                        if (response.data.batch_processing) {
-                            CPG.startBatchProcessing(response.data);
-                        } else {
-                            // Normale Verarbeitung
-                            CPG.showProgress(100, 'Generierung abgeschlossen!');
-                            CPG.renderResults(response.data);
-                            CPG.showNotice('✅ Seiten erfolgreich generiert!', 'success');
-                            
-                            // Ergebnisse dauerhaft anzeigen - keine automatische Aktualisierung
-                            // Der Benutzer kann manuell die Seite aktualisieren oder eine neue Generierung starten
-                        }
-                    } else {
-                        CPG.showNotice('❌ Fehler bei der Generierung: ' + (response.data || 'Unbekannter Fehler'), 'error');
-                    }
-                },
-                error: function(xhr, status, error) {
-                    
-                    if (status === 'timeout' && retryCount < maxRetries) {
-                        // Retry bei Timeout
-                        CPG.showNotice('⏱️ Timeout erreicht - Versuche erneut (' + (retryCount + 1) + '/' + maxRetries + ')...', 'warning');
-                        CPG.showProgress(50, 'Wiederhole Generierung...');
-                        
-                        setTimeout(function() {
-                            CPG.performGenerationWithRetry(sourcePageId, selectedCityData, slugPattern, replacements, timeout * 1.5, retryCount + 1);
-                        }, 5000);
-                        
-                    } else if (xhr.status === 504) {
-                        // Gateway Timeout - spezielle Behandlung
-                        CPG.showNotice('🚫 Server-Timeout (504). Bei ' + selectedCityData.length + ' Städten empfehlen wir kleinere Batches (20-30 Städte).', 'error');
-                        
-                        if (selectedCityData.length > 30) {
-                            CPG.showNotice('💡 Tipp: Teilen Sie Ihre Städte in kleinere Gruppen auf und generieren Sie diese nacheinander.', 'info');
-                        }
-                        
-                        // Hinweis auf Übersicht prüfen
-                        CPG.showNotice('ℹ️ Die Seiten wurden möglicherweise trotzdem erstellt. Prüfen Sie den "Übersicht"-Tab oder aktualisieren Sie die Seite.', 'info');
-                        
-                        // Übersicht-Tab Button hervorheben
-                        $('#cpg-tab-overview').css('background-color', '#ff9800').css('color', 'white');
-                        setTimeout(function() {
-                            $('#cpg-tab-overview').css('background-color', '').css('color', '');
-                        }, 5000);
-                        
-                    } else if (status === 'timeout') {
-                        CPG.showNotice('⏱️ Maximale Wiederholungen erreicht. Bitte versuchen Sie kleinere Batches.', 'error');
-                    } else {
-                        CPG.showNotice('❌ Ajax-Fehler: ' + error + ' (Status: ' + xhr.status + ')', 'error');
-                    }
-                },
-                complete: function() {
-                    CPG.isGenerating = false;
-                    setTimeout(function() {
-                        $('#cpg-progress').hide();
-                    }, 3000);
-                }
-            });
-        },
+			var maxRetries = 3;
+			
+			CPG.currentRequest = $.ajax({
+				url: cpgAjax.ajaxurl,
+				type: 'POST',
+				timeout: timeout,
+				data: {
+					action: 'cpg_generate_pages',
+					nonce: cpgAjax.nonce,
+					source_page_id: sourcePageId,
+					cities: JSON.stringify(selectedCityData),
+					slug_pattern: slugPattern,
+					replacements: JSON.stringify(replacements)
+					// Wenn viele Städte, gewünschte Batch-Parameter mitschicken (vom UI)
+					// Diese Felder werden serverseitig nur im Batch-Fall gelesen
+					, batch_size: (selectedCityData && selectedCityData.length >= 20) ? (parseInt($('#batch_size').val()) || 15) : undefined
+					, batch_delay: (selectedCityData && selectedCityData.length >= 20) ? (parseInt($('#batch_delay').val()) || 2) : undefined
+				},
+				success: function(response) {
+					if (response.success) {
+						// Prüfen ob Batch-Verarbeitung gestartet wurde
+						if (response.data.batch_processing) {
+							CPG.startBatchProcessing(response.data);
+						} else {
+							// Normale Verarbeitung
+							CPG.showProgress(100, 'Generierung abgeschlossen!');
+							CPG.renderResults(response.data);
+							CPG.showNotice('✅ Seiten erfolgreich generiert!', 'success');
+							$('#cpg-cancel').remove();
+							// Ergebnisse dauerhaft anzeigen - keine automatische Aktualisierung
+							// Der Benutzer kann manuell die Seite aktualisieren oder eine neue Generierung starten
+						}
+					} else {
+						CPG.showNotice('❌ Fehler bei der Generierung: ' + (response.data || 'Unbekannter Fehler'), 'error');
+					}
+				},
+				error: function(xhr, status, error) {
+					if (status === 'abort') {
+						CPG.showNotice('Vorgang abgebrochen.', 'warning');
+						$('#cpg-cancel').remove();
+						return;
+					}
+					// Beim ersten Timeout und vielen Städten: gezielt sofort Batch initialisieren
+					if (status === 'timeout' && retryCount === 0 && Array.isArray(selectedCityData) && selectedCityData.length >= 20) {
+						CPG.showNotice('⏱️ Timeout – wechsle automatisch in den Batch‑Modus…', 'warning');
+						// Sofortiger erneuter Aufruf mit kurzer eigener Timeoutgrenze, um nur die Batch-Metadaten zu bekommen
+						var quickTimeout = Math.min(20000, Math.max(10000, Math.floor(timeout/3)));
+						var qs = {
+							action: 'cpg_generate_pages',
+							nonce: cpgAjax.nonce,
+							source_page_id: sourcePageId,
+							cities: JSON.stringify(selectedCityData),
+							slug_pattern: slugPattern,
+							replacements: JSON.stringify(replacements)
+						};
+						// Batch-Parameter mitgeben
+						if (selectedCityData.length >= 20) {
+							qs.batch_size = parseInt($('#batch_size').val()) || 15;
+							qs.batch_delay = parseInt($('#batch_delay').val()) || 2;
+						}
+						$.ajax({
+							url: cpgAjax.ajaxurl,
+							type: 'POST',
+							timeout: quickTimeout,
+							data: qs,
+							success: function(res){
+								if (res && res.success && res.data && res.data.batch_processing) {
+									CPG.startBatchProcessing(res.data);
+									return;
+								}
+								// Falls kein Batch zurückkam, normalen Backoff-Pfad weiter nutzen
+								CPG.showNotice('Erneuter Versuch wird vorbereitet…', 'info');
+								CPG.performGenerationWithRetry(sourcePageId, selectedCityData, slugPattern, replacements, Math.round(timeout * 1.5), retryCount + 1);
+							},
+							error: function(){
+								// Fallback: normalen Backoff-Pfad weiter nutzen
+								CPG.performGenerationWithRetry(sourcePageId, selectedCityData, slugPattern, replacements, Math.round(timeout * 1.5), retryCount + 1);
+							}
+						});
+						return;
+					}
+					if (status === 'timeout' && retryCount < maxRetries) {
+						// Exponentielles Backoff mit Countdown
+						var waitMs = Math.min(30000, 5000 * Math.pow(2, retryCount));
+						var remaining = Math.ceil(waitMs / 1000);
+						CPG.showNotice('⏱️ Timeout – erneuter Versuch (' + (retryCount + 1) + '/' + maxRetries + ') in ' + remaining + 's...', 'warning');
+						var countdownInterval = setInterval(function(){
+							remaining -= 1;
+							if (remaining <= 0) { clearInterval(countdownInterval); return; }
+							CPG.showProgress(50, 'Wiederhole in ' + remaining + 's...');
+						}, 1000);
+						setTimeout(function() {
+							clearInterval(countdownInterval);
+							CPG.performGenerationWithRetry(sourcePageId, selectedCityData, slugPattern, replacements, Math.round(timeout * 1.5), retryCount + 1);
+						}, waitMs);
+					} else if (xhr.status === 504) {
+						// Gateway Timeout - spezielle Behandlung
+						CPG.showNotice('🚫 Server-Timeout (504). Bei ' + selectedCityData.length + ' Städten empfehlen wir kleinere Batches (20-30 Städte).', 'error');
+						if (selectedCityData.length > 30) {
+							CPG.showNotice('💡 Tipp: Teilen Sie Ihre Städte in kleinere Gruppen auf und generieren Sie diese nacheinander.', 'info');
+						}
+						CPG.showNotice('ℹ️ Die Seiten wurden möglicherweise trotzdem erstellt. Prüfen Sie den "Übersicht"-Tab oder aktualisieren Sie die Seite.', 'info');
+						$('#cpg-tab-overview').css('background-color', '#ff9800').css('color', 'white');
+						setTimeout(function() { $('#cpg-tab-overview').css('background-color', '').css('color', ''); }, 5000);
+					} else if (status === 'timeout') {
+						CPG.showNotice('⏱️ Maximale Wiederholungen erreicht. Bitte versuchen Sie kleinere Batches.', 'error');
+					} else {
+						CPG.showNotice('❌ Ajax-Fehler: ' + error + ' (Status: ' + xhr.status + ')', 'error');
+					}
+				},
+				complete: function() {
+					CPG.isGenerating = false;
+					CPG.currentRequest = null;
+					setTimeout(function() { $('#cpg-progress').hide(); }, 3000);
+				}
+			});
+		},
 
-        // Batch-Verarbeitung für große Seitenmengen
-        startBatchProcessing: function(batchData) {
+		// Benutzerabbruch der Generierung (AJAX abort)
+		cancelGeneration: function() {
+			try {
+				if (CPG.currentRequest && CPG.currentRequest.readyState !== 4) {
+					CPG.currentRequest.abort();
+				}
+			} catch(e) {}
+			CPG.isGenerating = false;
+			CPG.currentRequest = null;
+			$('#cpg-progress').hide();
+			$('#cpg-cancel').remove();
+			CPG.showNotice('Vorgang abgebrochen.', 'warning');
+		},
+ 
+ 		// Batch-Verarbeitung für große Seitenmengen
+ 		startBatchProcessing: function(batchData) {
             // Benutzerdefinierte Batch-Einstellungen abrufen
             var batchSize = parseInt($('#batch_size').val()) || 15;
             var batchDelay = parseInt($('#batch_delay').val()) || 2;
